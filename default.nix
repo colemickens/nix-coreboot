@@ -1,7 +1,6 @@
-let
-  sources = import ./nix/sources.nix;
-  pkgs = import sources.nixpkgs { };
+{ pkgs ? (import (import ./nix/sources.nix).nixpkgs {}) }:
 
+let
   ###
   ### Coreboot Toolchain Sources
   ###
@@ -143,20 +142,24 @@ rec {
   #
   # The coreboot build is well-behaved, so there is no need to do it
   # in a chroot.
-  coreboot = pkgs.stdenv.mkDerivation {
-    pname = "coreboot";
+  buildCoreboot = ({name, configText}: 
+  let
+    configFile = builtins.toFile "coreboot-config-${name}" configText;
+  in pkgs.stdenv.mkDerivation {
+    pname = name;
     version = corebootVersion;
 
     src = corebootSource;
 
     nativeBuildInputs = [ corebootToolchain ];
 
+    # TODO: patch @localversion@ in the config
     postPatch = ''
       patchShebangs util/xcompile/xcompile
     '';
 
     buildPhase = ''
-      cp ${./config} .config
+      cp ${configFile} .config
 
       make olddefconfig
       make
@@ -168,5 +171,5 @@ rec {
       mkdir -p $prefix
       install -m 0444 build/coreboot.rom $prefix
     '';
-  };
+  });
 }
