@@ -80,7 +80,8 @@
               langCC = true;
               langAda = true;
               profiledCompiler = false;
-              gnatboot = cbpkgs.gnat11;
+              gnatboot = cbpkgs.gnatboot;
+              # gnat11;
             });
             toolchainEnv = {
               nativeBuildInputs = with cbpkgs; [
@@ -88,7 +89,7 @@
                 gmp
                 mpfr
                 libmpc
-                _gcc
+                # _gcc
                 nasm
                 acpica-tools
               ];
